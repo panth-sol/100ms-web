@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, useEffect } from "react";
 // import { logMessage } from "zipyai";
 import { CopyIcon } from "@100mslive/react-icons";
 import {
@@ -11,6 +11,21 @@ import {
 } from "@100mslive/react-ui";
 import { ErrorWithSupportLink } from "./PreviewScreen";
 import { logMessage } from "../services/analytics";
+import useMixpanelWithPeerDetails from "../services/mixpanelService";
+
+const MixpanelEventComponent = props => {
+  const sendMixpanelEvent = useMixpanelWithPeerDetails();
+  const { error = null, errorInfo = null } = props;
+
+  useEffect(() => {
+    sendMixpanelEvent("ERROR_BOUNDARY", {
+      error,
+      errorInfo,
+    });
+  }, [error, errorInfo, sendMixpanelEvent]);
+
+  return <></>;
+};
 
 export class ErrorBoundary extends Component {
   constructor(props) {
@@ -117,6 +132,10 @@ export class ErrorBoundary extends Component {
               </details>
             </Flex>
           </Box>
+          <MixpanelEventComponent
+            error={this.state.error}
+            errorInfo={this.state.errorInfo}
+          />
         </Flex>
       );
     }

@@ -25,6 +25,7 @@ import {
 import { useNavigation } from "../hooks/useNavigation";
 import { getMetadata } from "../../common/utils";
 import { logMessage } from "../../services/analytics";
+import useMixpanelWithPeerDetails from "../../services/mixpanelService";
 
 export function Notifications() {
   const notification = useHMSNotifications();
@@ -32,6 +33,7 @@ export function Notifications() {
   const HLS_VIEWER_ROLE = useHLSViewerRole();
   const subscribedNotifications = useSubscribedNotifications() || {};
   const isHeadless = useIsHeadless();
+  const sendMixpanelEvent = useMixpanelWithPeerDetails();
 
   useEffect(() => {
     if (!notification) {
@@ -65,8 +67,17 @@ export function Notifications() {
             ToastManager.addToast({
               title: `Error: ${notification.data?.message}`,
             });
+            sendMixpanelEvent("NOTIFICATION", {
+              notificationType: "Error",
+              notificationMsg: notification?.data?.message,
+            });
           } else {
             logMessage("Disconnected");
+            sendMixpanelEvent("NOTIFICATION", {
+              notificationType: "Disconnected",
+              notificationMsg:
+                "We couldn’t reconnect you. When you’re back online, try joining the room.",
+            });
             // show button action when the error is terminal
             const toastId = ToastManager.addToast({
               title:
@@ -114,6 +125,11 @@ export function Notifications() {
         if (!subscribedNotifications.ERROR) return;
         ToastManager.addToast({
           title: `Error: ${notification.data?.message} - ${notification.data?.description}`,
+        });
+        sendMixpanelEvent("NOTIFICATION", {
+          notificationType: "Error",
+          notificationDesc: notification?.data?.description,
+          notificationMsg: notification?.data?.message,
         });
         break;
       case HMSNotificationTypes.ROLE_UPDATED:
@@ -164,6 +180,7 @@ export function Notifications() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     notification,
+    sendMixpanelEvent,
     subscribedNotifications.ERROR,
     subscribedNotifications.METADATA_UPDATED,
     HLS_VIEWER_ROLE,

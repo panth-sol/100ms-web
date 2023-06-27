@@ -8,6 +8,7 @@ import { ToastConfig } from "../Toast/ToastConfig";
 import { ToastManager } from "../Toast/ToastManager";
 // import { logMessage } from "zipyai";
 import { logMessage } from "../../services/analytics";
+import useMixpanelWithPeerDetails from "../../services/mixpanelService";
 
 const notificationTypes = [
   HMSNotificationTypes.RECONNECTED,
@@ -21,15 +22,23 @@ const isQA = true;
 export const ReconnectNotifications = () => {
   const notification = useHMSNotifications(notificationTypes);
   const [open, setOpen] = useState(false);
+  const sendMixpanelEvent = useMixpanelWithPeerDetails();
   useEffect(() => {
     if (
       notification?.type === HMSNotificationTypes.ERROR &&
       notification?.data?.isTerminal
     ) {
       logMessage("Error ", notification.data?.description);
+      sendMixpanelEvent("NOTIFICATION", {
+        notificationType: "Error",
+        notificationDesc: notification.data?.description,
+      });
       setOpen(false);
     } else if (notification?.type === HMSNotificationTypes.RECONNECTED) {
       logMessage("Reconnected");
+      sendMixpanelEvent("NOTIFICATION", {
+        notificationType: "Reconnected",
+      });
       notificationId = ToastManager.replaceToast(
         notificationId,
         ToastConfig.RECONNECTED.single()
@@ -37,6 +46,9 @@ export const ReconnectNotifications = () => {
       setOpen(false);
     } else if (notification?.type === HMSNotificationTypes.RECONNECTING) {
       logMessage("Reconnecting");
+      sendMixpanelEvent("NOTIFICATION", {
+        notificationType: "Reconnecting",
+      });
       if (isQA) {
         ToastManager.removeToast(notificationId);
         setOpen(true);
@@ -47,7 +59,7 @@ export const ReconnectNotifications = () => {
         );
       }
     }
-  }, [notification]);
+  }, [notification, sendMixpanelEvent]);
   if (!open || !isQA) return null;
   return (
     <Dialog.Root open={open} modal={true}>

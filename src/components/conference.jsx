@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { usePrevious } from "react-use";
 import {
   HMSRoomState,
   selectAppData,
   selectIsConnectedToRoom,
+  selectLocalPeerID,
   selectRoomState,
   useHMSActions,
   useHMSStore,
@@ -17,6 +18,10 @@ import { Header } from "./Header";
 import { RoleChangeRequestModal } from "./RoleChangeRequestModal";
 import { useIsHeadless } from "./AppData/useUISettings";
 import { useNavigation } from "./hooks/useNavigation";
+import CaptureStats from "../services/CaptureStats";
+import useMixpanelWithPeerDetails, {
+  mixpanelIdentify,
+} from "../services/mixpanelService";
 import {
   APP_DATA,
   EMOJI_REACTION_TYPE,
@@ -39,6 +44,8 @@ const Conference = () => {
   const footerRef = useRef();
   const dropdownListRef = useRef();
   const performAutoHide = hideControls && (isAndroid || isIOS || isIPadOS);
+  const localPeerId = useHMSStore(selectLocalPeerID);
+  const sendMixpanelEvent = useMixpanelWithPeerDetails();
 
   const toggleControls = e => {
     if (dropdownListRef.current?.length === 0) {
@@ -86,6 +93,19 @@ const Conference = () => {
       hmsActions.ignoreMessageTypes(["chat", EMOJI_REACTION_TYPE]);
     }
   }, [isHeadless, hmsActions]);
+
+  useEffect(() => {
+    mixpanelIdentify(localPeerId);
+    sendMixpanelEvent("PEER_INIT", {
+      peer_id: localPeerId,
+      type: "test",
+    });
+  }, [localPeerId, sendMixpanelEvent]);
+
+  const renderCaptureStats = useMemo(() => {
+    return <CaptureStats intervalInMS={5000} />;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!isConnectedToRoom) {
     return <FullPageProgress />;
@@ -144,6 +164,7 @@ const Conference = () => {
         </Box>
       )}
       <RoleChangeRequestModal />
+      {renderCaptureStats}
     </Flex>
   );
 };

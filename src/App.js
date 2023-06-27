@@ -29,6 +29,7 @@ import { FlyingEmoji } from "./plugins/FlyingEmoji.jsx";
 import { RemoteStopScreenshare } from "./plugins/RemoteStopScreenshare";
 import { getRoutePrefix, shadeColor } from "./common/utils";
 import { FeatureFlags } from "./services/FeatureFlags";
+import { mixpanelInit } from "./services/mixpanelService";
 import "./base.css";
 import "./index.css";
 
@@ -37,6 +38,7 @@ const PreviewScreen = React.lazy(() => import("./components/PreviewScreen"));
 
 const defaultTokenEndpoint = process.env.REACT_APP_TOKEN_GENERATION_ENDPOINT;
 const envPolicyConfig = JSON.parse(process.env.REACT_APP_POLICY_CONFIG || "{}");
+mixpanelInit();
 
 let appName;
 if (window.location.host.includes("localhost")) {

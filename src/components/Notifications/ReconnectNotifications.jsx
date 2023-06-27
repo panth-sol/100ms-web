@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { logMessage } from "zipyai";
 import {
   HMSNotificationTypes,
   useHMSNotifications,
@@ -7,6 +6,8 @@ import {
 import { Dialog, Flex, Loading, Text } from "@100mslive/react-ui";
 import { ToastConfig } from "../Toast/ToastConfig";
 import { ToastManager } from "../Toast/ToastManager";
+// import { logMessage } from "zipyai";
+import { logMessage } from "../../services/analytics";
 
 const notificationTypes = [
   HMSNotificationTypes.RECONNECTED,
@@ -15,7 +16,8 @@ const notificationTypes = [
 ];
 let notificationId = null;
 
-const isQA = process.env.REACT_APP_ENV === "qa";
+// const isQA = process.env.REACT_APP_ENV === "qa";
+const isQA = true;
 export const ReconnectNotifications = () => {
   const notification = useHMSNotifications(notificationTypes);
   const [open, setOpen] = useState(false);

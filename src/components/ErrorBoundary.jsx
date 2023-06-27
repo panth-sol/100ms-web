@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { logMessage } from "zipyai";
+// import { logMessage } from "zipyai";
 import { CopyIcon } from "@100mslive/react-icons";
 import {
   Box,
@@ -10,6 +10,7 @@ import {
   Tooltip,
 } from "@100mslive/react-ui";
 import { ErrorWithSupportLink } from "./PreviewScreen";
+import { logMessage } from "../services/analytics";
 
 export class ErrorBoundary extends Component {
   constructor(props) {

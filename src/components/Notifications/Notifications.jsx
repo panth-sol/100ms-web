@@ -1,6 +1,6 @@
 /* eslint-disable no-case-declarations */
 import React, { useEffect } from "react";
-import { logMessage } from "zipyai";
+// import { logMessage } from "zipyai";
 import {
   HMSNotificationTypes,
   useHMSNotifications,
@@ -24,6 +24,7 @@ import {
 } from "../AppData/useUISettings";
 import { useNavigation } from "../hooks/useNavigation";
 import { getMetadata } from "../../common/utils";
+import { logMessage } from "../../services/analytics";
 
 export function Notifications() {
   const notification = useHMSNotifications();

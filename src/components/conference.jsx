@@ -96,10 +96,7 @@ const Conference = () => {
 
   useEffect(() => {
     mixpanelIdentify(localPeerId);
-    sendMixpanelEvent("PEER_INIT", {
-      peer_id: localPeerId,
-      type: "test",
-    });
+    sendMixpanelEvent("PEER_INIT");
   }, [localPeerId, sendMixpanelEvent]);
 
   const renderCaptureStats = useMemo(() => {

@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useFullscreen, useToggle } from "react-use";
 import {
   HLSPlaybackState,
@@ -28,6 +34,7 @@ import { FullScreenButton } from "../components/HMSVideo/FullscreenButton";
 import { HLSAutoplayBlockedPrompt } from "../components/HMSVideo/HLSAutoplayBlockedPrompt";
 import { HLSQualitySelector } from "../components/HMSVideo/HLSQualitySelector";
 import { ToastManager } from "../components/Toast/ToastManager";
+import CaptureHlsStats from "../services/CaptureHlsStats";
 import { APP_DATA, EMOJI_REACTION_TYPE } from "../common/constants";
 
 let hlsPlayer;
@@ -200,6 +207,13 @@ const HLSView = () => {
     hmsActions.setAppData(APP_DATA.hlsStats, !enablHlsStats);
   };
 
+  const renderCaptureStats = useMemo(() => {
+    return (
+      <CaptureHlsStats hlsStatsState={hlsStatsState} intervalInMS={5000} />
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hlsStatsState]);
+
   return (
     <Flex
       key="hls-viewer"
@@ -314,6 +328,7 @@ const HLSView = () => {
               </HMSVideoPlayer.Controls.Right>
             </HMSVideoPlayer.Controls.Root>
           </HMSVideoPlayer.Root>
+          {renderCaptureStats}
         </Flex>
       ) : (
         <Flex align="center" justify="center" css={{ size: "100%", px: "$10" }}>

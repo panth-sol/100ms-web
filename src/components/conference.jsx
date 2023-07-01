@@ -47,6 +47,8 @@ const Conference = () => {
   const localPeerId = useHMSStore(selectLocalPeerID);
   const sendMixpanelEvent = useMixpanelWithPeerDetails();
 
+  hmsActions.setAppData(APP_DATA.hlsStats, true);
+
   const toggleControls = e => {
     if (dropdownListRef.current?.length === 0) {
       setHideControls(value => !value);

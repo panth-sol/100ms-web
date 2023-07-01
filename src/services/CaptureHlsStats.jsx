@@ -4,7 +4,6 @@ import { getDurationFromSeconds } from "../components/HMSVideo/HMSVIdeoUtils";
 import useMixpanelWithPeerDetails from "../services/mixpanelService";
 
 export const getHlsStatData = hlsStatsState => {
-  console.log("==> getHlsStatData ==>", hlsStatsState);
   return {
     "Stream url": hlsStatsState?.url || "NA",
     "Video size":

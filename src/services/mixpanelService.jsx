@@ -21,6 +21,9 @@ export const mixpanelIdentify = localPeerId => {
 };
 
 export function sendEvent(eventName, eventData) {
+  console.log("===> eventName ===>", eventName);
+  console.log(eventData);
+  console.log("===> ===> ===>");
   mixpanel.track(eventName, eventData);
 }
 

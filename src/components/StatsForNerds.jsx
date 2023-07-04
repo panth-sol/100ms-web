@@ -149,7 +149,7 @@ export const StatsForNerds = ({ onOpenChange }) => {
   );
 };
 
-const useTracksWithLabel = () => {
+export const useTracksWithLabel = () => {
   const tracksMap = useHMSStore(selectTracksMap);
   const peersMap = useHMSStore(selectPeersMap);
   const localPeerID = useHMSStore(selectLocalPeerID);

@@ -1,6 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import isEmpty from "lodash/isEmpty";
 import { selectHMSStats, useHMSStatsStore } from "@100mslive/react-sdk";
+import { useTracksWithLabel } from "../components/StatsForNerds";
 import useMixpanelWithPeerDetails from "../services/mixpanelService";
 
 const formatBytes = (bytes, unit = "B", decimals = 2) => {
@@ -20,8 +22,8 @@ const formatBytes = (bytes, unit = "B", decimals = 2) => {
 
 const getAVStatData = stats => {
   return {
-    "Packets Lost": stats?.subscribe?.packetsLost || "-",
-    Jitter: stats?.subscribe?.jitter || "-",
+    "Packets Lost": stats?.subscribe?.packetsLost || "0",
+    Jitter: stats?.subscribe?.jitter || "0",
     "Publish Bitrate": formatBytes(stats?.publish?.bitrate, "b/s"),
     "Subscribe Bitrate": formatBytes(stats?.subscribe?.bitrate, "b/s"),
     "Available Outgoing Bitrate": formatBytes(
@@ -37,6 +39,74 @@ const getAVStatData = stats => {
       ).toFixed(3) * 1000
     } ms`,
   };
+};
+
+const getHostStatData = stats => {
+  if (isEmpty(stats)) {
+    return null;
+  }
+
+  let hostStat = {
+    "Peer Name": stats?.peerName,
+    "Peer Id": stats?.peerId,
+    Bitrate: formatBytes(stats?.bitrate, "b/s"),
+    Jitter: stats?.jitter?.toFixed(3) || "0",
+    codec: stats?.codec,
+    type: stats?.type,
+    codecId: stats?.codecId,
+    kind: stats?.kind,
+  };
+
+  if (!isEmpty(stats?.packetsLost)) {
+    hostStat = {
+      ...hostStat,
+      "Packets Lost": stats?.packetsLost || "0",
+    };
+  }
+
+  const inbound = stats?.type?.includes("inbound");
+
+  if (inbound) {
+    hostStat = {
+      ...hostStat,
+      "Bytes Received": formatBytes(stats?.bytesReceived),
+    };
+  } else {
+    hostStat = {
+      ...hostStat,
+      "Bytes Sent": formatBytes(stats?.bytesSent),
+    };
+  }
+
+  if (stats.kind === "video") {
+    hostStat = {
+      ...hostStat,
+      Framerate: stats?.framesPerSecond,
+    };
+    if (inbound && !isEmpty(stats?.qualityLimitationReason)) {
+      hostStat = {
+        ...hostStat,
+        "Quality Limitation Reason": stats?.qualityLimitationReason,
+      };
+    }
+  }
+
+  if (!isEmpty(stats?.frameWidth) && !isEmpty(stats?.frameHeight)) {
+    hostStat = {
+      ...hostStat,
+      "Video size": `${stats?.frameWidth} x ${stats?.frameHeight}`,
+    };
+  }
+
+  if (!isEmpty(stats?.roundTripTime)) {
+    hostStat = {
+      ...hostStat,
+      "Round Trip Time": `${
+        stats?.roundTripTime ? `${stats.roundTripTime * 1000} ms` : "-"
+      }`,
+    };
+  }
+  return hostStat;
 };
 
 export const useGetAVStats = intervalInMS => {
@@ -79,8 +149,35 @@ const CaptureStats = ({ intervalInMS }) => {
   const avStats = useGetAVStats(intervalInMS);
   const sendMixpanelEvent = useMixpanelWithPeerDetails();
 
+  const tracksWithLabels = useTracksWithLabel();
+  const hostVideoTrackId = tracksWithLabels.filter(
+    track =>
+      !track.local &&
+      track.label.includes("teacher") &&
+      track.label.includes("video")
+  )?.[0]?.id;
+  const hostVideoStats = getHostStatData(
+    useHMSStatsStore(selectHMSStats.trackStatsByID(hostVideoTrackId))
+  );
+
+  const hostAudioTrackId = tracksWithLabels.filter(
+    track =>
+      !track.local &&
+      track.label.includes("teacher") &&
+      track.label.includes("audio")
+  )?.[0]?.id;
+  const hostAudioStats = getHostStatData(
+    useHMSStatsStore(selectHMSStats.trackStatsByID(hostAudioTrackId))
+  );
+
+  const sendHostEvent = () => {
+    sendMixpanelEvent("HOST_VIDEO_STATS", hostVideoStats);
+    sendMixpanelEvent("HOST_AUDIO_STATS", hostAudioStats);
+  };
+
   const sendEvent = useCallback(() => {
     sendMixpanelEvent("AV_STATS", avStats);
+    sendHostEvent();
   }, [avStats, sendMixpanelEvent]);
 
   useEffect(() => {

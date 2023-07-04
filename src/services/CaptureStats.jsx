@@ -1,7 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import isEmpty from "lodash/isEmpty";
-import { selectHMSStats, useHMSStatsStore } from "@100mslive/react-sdk";
+import {
+  selectHMSStats,
+  selectLocalPeerRoleName,
+  useHMSStatsStore,
+  useHMSStore,
+} from "@100mslive/react-sdk";
 import { useTracksWithLabel } from "../components/StatsForNerds";
 import useMixpanelWithPeerDetails from "../services/mixpanelService";
 
@@ -148,6 +153,7 @@ export const useGetAVStats = intervalInMS => {
 const CaptureStats = ({ intervalInMS }) => {
   const avStats = useGetAVStats(intervalInMS);
   const sendMixpanelEvent = useMixpanelWithPeerDetails();
+  const localPeerRole = useHMSStore(selectLocalPeerRoleName);
 
   const tracksWithLabels = useTracksWithLabel();
   const hostVideoTrackId = tracksWithLabels.filter(
@@ -171,8 +177,12 @@ const CaptureStats = ({ intervalInMS }) => {
   );
 
   const sendHostEvent = () => {
-    sendMixpanelEvent("HOST_VIDEO_STATS", hostVideoStats);
-    sendMixpanelEvent("HOST_AUDIO_STATS", hostAudioStats);
+    if (localPeerRole.toLowerCase().includes("guest")) {
+      !isEmpty(hostVideoStats) &&
+        sendMixpanelEvent("HOST_VIDEO_STATS", hostVideoStats);
+      !isEmpty(hostAudioStats) &&
+        sendMixpanelEvent("HOST_AUDIO_STATS", hostAudioStats);
+    }
   };
 
   const sendEvent = useCallback(() => {

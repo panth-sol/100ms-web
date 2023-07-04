@@ -86,7 +86,24 @@ const getHostStatData = stats => {
   if (stats.kind === "video") {
     hostStat = {
       ...hostStat,
-      Framerate: stats?.framesPerSecond,
+      Framerate: stats?.framesPerSecond || "NA",
+      "Frame Height": stats?.frameHeight || "NA",
+      "Frame Width": stats?.frameWidth || "NA",
+      framesAssembledFromMultiplePackets:
+        stats?.framesAssembledFromMultiplePackets || "NA",
+      framesDecoded: stats?.framesDecoded || "NA",
+      framesDropped: stats?.framesDropped || "NA",
+      framesReceived: stats?.framesReceived || "NA",
+      freezeCount: stats?.freezeCount || "NA",
+      headerBytesReceived: stats?.headerBytesReceived || "NA",
+      pauseCount: stats?.pauseCount || "NA",
+      totalAssemblyTime: stats?.totalAssemblyTime || "NA",
+      totalDecodeTime: stats?.totalDecodeTime || "NA",
+      totalFreezesDuration: stats?.totalFreezesDuration || "NA",
+      totalInterFrameDelay: stats?.totalInterFrameDelay || "NA",
+      totalPausesDuration: stats?.totalPausesDuration || "NA",
+      totalProcessingDelay: stats?.totalProcessingDelay || "NA",
+      totalSquaredInterFrameDelay: stats?.totalSquaredInterFrameDelay || "NA",
     };
     if (inbound && !isEmpty(stats?.qualityLimitationReason)) {
       hostStat = {
@@ -94,13 +111,6 @@ const getHostStatData = stats => {
         "Quality Limitation Reason": stats?.qualityLimitationReason,
       };
     }
-  }
-
-  if (!isEmpty(stats?.frameWidth) && !isEmpty(stats?.frameHeight)) {
-    hostStat = {
-      ...hostStat,
-      "Video size": `${stats?.frameWidth} x ${stats?.frameHeight}`,
-    };
   }
 
   if (!isEmpty(stats?.roundTripTime)) {

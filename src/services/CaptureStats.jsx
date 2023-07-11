@@ -27,13 +27,12 @@ const formatBytes = (bytes, unit = "B", decimals = 2) => {
 
 const getAVStatData = stats => {
   return {
-    "Packets Lost": stats?.subscribe?.packetsLost || "0",
-    Jitter: stats?.subscribe?.jitter || "0",
-    "Publish Bitrate": formatBytes(stats?.publish?.bitrate, "b/s"),
-    "Subscribe Bitrate": formatBytes(stats?.subscribe?.bitrate, "b/s"),
+    "Packets Lost": stats?.subscribe?.packetsLost || 0,
+    Jitter: stats?.subscribe?.jitter || 0,
+    "Publish Bitrate": formatBytes(stats?.publish?.bitrate),
+    "Subscribe Bitrate": formatBytes(stats?.subscribe?.bitrate),
     "Available Outgoing Bitrate": formatBytes(
-      stats?.publish?.availableOutgoingBitrate,
-      "b/s"
+      stats?.publish?.availableOutgoingBitrate
     ),
     "Total Bytes Sent": formatBytes(stats?.publish?.bytesSent),
     "Round Trip Time": `${
@@ -42,7 +41,7 @@ const getAVStatData = stats => {
           (stats?.subscribe?.currentRoundTripTime || 0)) /
         2
       ).toFixed(3) * 1000
-    } ms`,
+    }`,
   };
 };
 
@@ -54,8 +53,8 @@ const getHostStatData = stats => {
   let hostStat = {
     "Peer Name": stats?.peerName,
     "Peer Id": stats?.peerId,
-    Bitrate: formatBytes(stats?.bitrate, "b/s"),
-    Jitter: stats?.jitter?.toFixed(3) || "0",
+    Bitrate: formatBytes(stats?.bitrate),
+    Jitter: stats?.jitter?.toFixed(3) || 0,
     codec: stats?.codec,
     type: stats?.type,
     codecId: stats?.codecId,
@@ -65,7 +64,7 @@ const getHostStatData = stats => {
   if (!isEmpty(stats?.packetsLost)) {
     hostStat = {
       ...hostStat,
-      "Packets Lost": stats?.packetsLost || "0",
+      "Packets Lost": stats?.packetsLost || 0,
     };
   }
 
@@ -86,23 +85,23 @@ const getHostStatData = stats => {
   if (stats.kind === "video") {
     hostStat = {
       ...hostStat,
-      Framerate: stats?.framesPerSecond || "NA",
-      "Frame Height": stats?.frameHeight || "NA",
-      "Frame Width": stats?.frameWidth || "NA",
+      Framerate: stats?.framesPerSecond || null,
+      "Frame Height": stats?.frameHeight || null,
+      "Frame Width": stats?.frameWidth || null,
       framesAssembledFromMultiplePackets:
-        stats?.framesAssembledFromMultiplePackets || "NA",
-      framesDecoded: stats?.framesDecoded || "NA",
-      framesDropped: stats?.framesDropped || "NA",
-      framesReceived: stats?.framesReceived || "NA",
-      freezeCount: stats?.freezeCount || "NA",
-      headerBytesReceived: stats?.headerBytesReceived || "NA",
-      pauseCount: stats?.pauseCount || "NA",
-      totalAssemblyTime: stats?.totalAssemblyTime || "NA",
-      totalDecodeTime: stats?.totalDecodeTime || "NA",
-      totalFreezesDuration: stats?.totalFreezesDuration || "NA",
-      totalInterFrameDelay: stats?.totalInterFrameDelay || "NA",
-      totalPausesDuration: stats?.totalPausesDuration || "NA",
-      totalProcessingDelay: stats?.totalProcessingDelay || "NA",
+        stats?.framesAssembledFromMultiplePackets || null,
+      framesDecoded: stats?.framesDecoded || null,
+      framesDropped: stats?.framesDropped || null,
+      framesReceived: stats?.framesReceived || null,
+      freezeCount: stats?.freezeCount || null,
+      headerBytesReceived: stats?.headerBytesReceived || null,
+      pauseCount: stats?.pauseCount || null,
+      totalAssemblyTime: stats?.totalAssemblyTime || null,
+      totalDecodeTime: stats?.totalDecodeTime || null,
+      totalFreezesDuration: stats?.totalFreezesDuration || null,
+      totalInterFrameDelay: stats?.totalInterFrameDelay || null,
+      totalPausesDuration: stats?.totalPausesDuration || null,
+      totalProcessingDelay: stats?.totalProcessingDelay || null,
       totalSquaredInterFrameDelay: stats?.totalSquaredInterFrameDelay || "NA",
     };
     if (inbound && !isEmpty(stats?.qualityLimitationReason)) {
@@ -117,7 +116,7 @@ const getHostStatData = stats => {
     hostStat = {
       ...hostStat,
       "Round Trip Time": `${
-        stats?.roundTripTime ? `${stats.roundTripTime * 1000} ms` : "-"
+        stats?.roundTripTime ? `${stats.roundTripTime * 1000}` : null
       }`,
     };
   }

@@ -168,7 +168,6 @@ const CaptureStats = ({ intervalInMS }) => {
   const hostVideoTrackId = tracksWithLabels.filter(
     track =>
       !track.local &&
-      track.label.includes("teacher") &&
       track.label.includes("video")
   )?.[0]?.id;
   const hostVideoStats = getHostStatData(
